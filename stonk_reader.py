@@ -16,6 +16,10 @@ client = gspread.authorize(creds)
 
 sheet = client.open('stonk_lurker').sheet1
 
+pp = pprint.PrettyPrinter()
+result = sheet.get_all_records()
+
+
 def read_info(file,arg, num=0):
 	data = open(file).read()
 	liste = [row for row in data.split('\n')]
@@ -25,6 +29,16 @@ def read_info(file,arg, num=0):
 def del_dodo(string):
 	try:
 		get = re.findall(r'[\d[a-zA-Z]{5}', string)
+	except:
+		get = ''
+
+	for el in get:
+		string = string.replace(el, '')
+	return string
+
+def del_mention(string):
+	try:
+		get = re.findall(r'@[\w]*', string)
 	except:
 		get = ''
 
@@ -68,15 +82,17 @@ def generate_stonk(taille=15):
 		try:
 			quoted_tweet = read_info('tweets.txt', 'quoted_status', num=i)['text']
 			quoted_tweet_sansdodo = del_dodo(quoted_tweet)
-			price_quote = find_stonk(quoted_tweet_sansdodo)
+			quoted_tweet_clean = del_mention(quoted_tweet_sansdodo)
+			price_quote = find_stonk(quoted_tweet_clean)
 		except:
 			quoted_tweet = None
 			price_quote = 0
 
 		tweet = read_info('tweets.txt', 'text', num=i)
 		tweet_sansdodo = del_dodo(tweet)
+		tweet_clean = del_mention(tweet_sansdodo)
 		try:
-			price_tweet = find_stonk(tweet_sansdodo)
+			price_tweet = find_stonk(tweet_clean)
 		except:
 			price_tweet = 0
 
